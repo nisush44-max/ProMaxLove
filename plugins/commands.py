@@ -198,10 +198,10 @@ def build_start_html(name, username, premium=True, total_users=0):
         # Existing Rich account-flow box/table: unchanged.
         '<details><summary><b>ACCOUNT FLOW</b></summary>',
         rich_table(["Step", "Action"], [
-            (f'{_user_emoji("1️⃣", premium)} 01', 'Open Help'),
-            (f'{_user_emoji("2️⃣", premium)} 02', 'Login your Telegram account'),
-            (f'{_user_emoji("3️⃣", premium)} 03', 'Accept requests from one target chat'),
-            (f'{_user_emoji("4️⃣", premium)} 04', 'Receive that target chat\'s final report'),
+            (f'{_user_emoji("1️⃣", premium)}', 'Open Help'),
+            (f'{_user_emoji("2️⃣", premium)}', 'Login your Telegram account'),
+            (f'{_user_emoji("3️⃣", premium)}', 'Accept requests from one target chat'),
+            (f'{_user_emoji("4️⃣", premium)}', 'Receive that target chat\'s final report'),
         ], raw=True),
         '</details>',
 
