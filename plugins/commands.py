@@ -136,6 +136,16 @@ async def get_total_users():
     return 0
 
 
+def _rich_small(text):
+    """Render compact helper text in the project's Rich Message markup."""
+    return f"<small>{text}</small>"
+
+
+def _rich_quote(text):
+    """Render a compact Rich Message quote block."""
+    return f"<blockquote>{_rich_small(text)}</blockquote>"
+
+
 def build_start_html(name, username, premium=True, total_users=0):
     n = escape(name or "there")
     bot_username = (username or "RequestApprovalBot").lstrip("@")
