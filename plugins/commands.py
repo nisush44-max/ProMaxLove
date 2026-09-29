@@ -87,8 +87,8 @@ async def get_total_users():
     Different database revisions use different method names, so prefer the
     project's existing count/list methods and fall back to get_stats().
     """
-    # Direct async/sync count methods used by this project's DB and common revisions.
-    for method_name in ("total_users_count", "get_total_users", "get_user_count", "count_users"):
+    # Direct async/sync count methods used by common database revisions.
+    for method_name in ("get_total_users", "get_user_count", "count_users"):
         method = getattr(db, method_name, None)
         if method is not None:
             try:
@@ -138,7 +138,21 @@ async def get_total_users():
 
 def build_start_html(name, username, premium=True, total_users=0):
     n = escape(name or "there")
+    bot_username = (username or "RequestApprovalBot").lstrip("@")
+
+    # Only the hero text layout is changed here.
+    # Tables, details boxes, buttons and slideshow are intentionally unchanged.
     title = f'{_user_emoji("💎", premium)} <b>SYNAX JOIN REQUEST HUB</b>'
+    fast_line = (
+        f'{_user_emoji("⚡", premium)} '
+        f'<i>Fast • clean • secure join-request processing</i>'
+    )
+    welcome_line = f'{_user_emoji("👋", premium)} <b>Welcome, {n}!</b>'
+    users_line = (
+        f'{_user_emoji("👥", premium)} '
+        f'<b>Total Users:</b> <code>{int(total_users):,}</code>'
+    )
+
     feature_rows = [
         (_user_emoji("🚀", premium), "Fast pending-request approval"),
         (_user_emoji("🔗", premium), "Channel + Group workflow"),
@@ -146,17 +160,32 @@ def build_start_html(name, username, premium=True, total_users=0):
         (_user_emoji("✨", premium), "Native Telegram Rich Message UI"),
         (_user_emoji("🔒", premium), "Protected login/session flow"),
     ]
-    rows = [(a, b) for a, b in feature_rows]
+
+    # Keep the management text as one compact quoted Rich block.
+    manage_quote = _rich_quote(
+        f'{_user_emoji("📝", premium)} '
+        f'<b>Manage</b> pending join requests from your own Telegram account '
+        f'with a structured, swipeable and interactive interface.'
+    )
+
     html = [
         _slide_html(),
-        f'<b>{title}</b>\n\n',
-        f'\n<i>Fast • clean • secure join-request processing</i>',        
-        f'\n{_user_emoji("👋", premium)} Welcome, <b>{n}</b>!\n',
-        f'{_user_emoji("👥", premium)} <b>Total Users:</b> <code>{int(total_users):,}</code>\n',
-        '\nManage pending join requests from your own Telegram account with a structured, swipeable and interactive interface.\n',
+
+        # Each hero item gets an explicit Rich line break.
+        f'{title}<br>',
+        f'{_rich_small(fast_line)}<br>',
+        f'{welcome_line}<br>',
+        f'{users_line}<br>',
+
+        # Manage -> interface stays inside the quote block.
+        manage_quote,
+
+        # Existing Rich feature box/table: unchanged.
         '<details open><summary><b>LIVE FEATURES</b></summary>',
-        rich_table(["Feature", "What it does"], rows, raw=True),
+        rich_table(["Feature", "What it does"], feature_rows, raw=True),
         '</details>',
+
+        # Existing Rich account-flow box/table: unchanged.
         '<details><summary><b>ACCOUNT FLOW</b></summary>',
         rich_table(["Step", "Action"], [
             (f'{_user_emoji("1️⃣", premium)} 01', 'Open Help'),
@@ -165,7 +194,8 @@ def build_start_html(name, username, premium=True, total_users=0):
             (f'{_user_emoji("4️⃣", premium)} 04', 'Receive that target chat\'s final report'),
         ], raw=True),
         '</details>',
-        '<b>All main actions are now inside Telegram Rich Message buttons.</b>\n',
+
+        '<b>All main actions are now inside Telegram Rich Message buttons.</b><br>',
         rich_button_row(*[
             rich_button("Help", emoji="❓", data="cmd:help", style="primary", premium=premium),
             rich_button("Shop", emoji="🤖", kind="url", url="https://t.me/ShopSynax", style="primary", premium=premium),
@@ -175,12 +205,12 @@ def build_start_html(name, username, premium=True, total_users=0):
             rich_button("Support Group", emoji="📢", kind="url", url="https://t.me/synaxsupport", style="success", premium=premium),
         ]),
         rich_button_row(*[
-            rich_button("Add To Channel", emoji="➕", kind="url", url=f"https://t.me/{username.lstrip('@')}?startchannel=true", style="danger", premium=premium),
-            rich_button("Add To Group", emoji="➕", kind="url", url=f"https://t.me/{username.lstrip('@')}?startgroup=true", style="danger", premium=premium),
+            rich_button("Add To Channel", emoji="➕", kind="url", url=f"https://t.me/{bot_username}?startchannel=true", style="danger", premium=premium),
+            rich_button("Add To Group", emoji="➕", kind="url", url=f"https://t.me/{bot_username}?startgroup=true", style="danger", premium=premium),
         ]),
     ]
-    return "".join(html)
 
+    return "".join(html)
 
 def build_help_html(username, premium=True):
     username = (username or "RequestApprovalBot").lstrip("@")
